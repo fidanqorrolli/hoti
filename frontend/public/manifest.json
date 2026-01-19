@@ -1,0 +1,28 @@
+{
+  "name": "HotiEnergieTec Arbeitsberichte",
+  "short_name": "HotiEnergieTec",
+  "description": "Mobile Arbeitsberichts-App für HotiEnergieTec Techniker",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#2c5aa0",
+  "background_color": "#f8f9fa",
+  "orientation": "portrait",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "lang": "de-DE",
+  "dir": "ltr"
+}

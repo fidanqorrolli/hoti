@@ -51,10 +51,6 @@ const ReportDetailPage = () => {
     bezeichnung: ''
   });
 
-  useEffect(() => {
-    loadReport();
-  }, [id]);
-
   const loadReport = async () => {
     try {
       const response = await axios.get(`${API}/arbeitsberichte/${id}`);
@@ -79,6 +75,10 @@ const ReportDetailPage = () => {
     }
     setLoading(false);
   };
+
+  useEffect(() => {
+    loadReport();
+  }, [id]);
 
   const handleSave = async () => {
     try {

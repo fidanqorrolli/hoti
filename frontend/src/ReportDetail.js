@@ -193,6 +193,56 @@ const ReportDetailPage = () => {
     }
   };
 
+  // Helper functions for tab interface
+  const addArbeitszeit = () => {
+    handleAddWorkTime();
+  };
+
+  const removeArbeitszeit = (index) => {
+    handleRemoveWorkTime(index);
+  };
+
+  const updateArbeitszeit = (index, field, value) => {
+    const updatedWorkTimes = [...editData.arbeitszeiten];
+    updatedWorkTimes[index] = { ...updatedWorkTimes[index], [field]: value };
+    setEditData({ ...editData, arbeitszeiten: updatedWorkTimes });
+  };
+
+  const calculateWorkTime = (start, end, pause = 0) => {
+    if (!start || !end) return '0:00';
+    
+    const startTime = new Date(`2000-01-01T${start}`);
+    const endTime = new Date(`2000-01-01T${end}`);
+    const diffMs = endTime - startTime - (pause * 60 * 1000);
+    
+    if (diffMs <= 0) return '0:00';
+    
+    const hours = Math.floor(diffMs / (1000 * 60 * 60));
+    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    
+    return `${hours}:${minutes.toString().padStart(2, '0')}`;
+  };
+
+  const addMaterial = () => {
+    handleAddMaterial();
+  };
+
+  const removeMaterial = (index) => {
+    handleRemoveMaterial(index);
+  };
+
+  const updateMaterial = (index, field, value) => {
+    const updatedMaterials = [...editData.materialien];
+    updatedMaterials[index] = { ...updatedMaterials[index], [field]: value };
+    setEditData({ ...editData, materialien: updatedMaterials });
+  };
+
+  const clearSignature = () => {
+    if (signaturePadRef.current) {
+      signaturePadRef.current.clear();
+    }
+  };
+
   if (loading) {
     return (
       <div className="loading-screen">

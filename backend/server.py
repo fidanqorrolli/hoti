@@ -240,6 +240,8 @@ class ArbeitsberichtUpdate(BaseModel):
     offene_arbeiten: Optional[str] = None
     verrechnung: Optional[str] = None
     status: Optional[BerichtStatus] = None
+    # Prüfbericht kann aktualisiert werden
+    pruefbericht_feuerung: Optional[PruefberichtFeuerung] = None
 
 # Authentication functions
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):

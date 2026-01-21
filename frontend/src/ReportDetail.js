@@ -239,6 +239,48 @@ const ReportDetailPage = () => {
         </div>
       </div>
 
+      {/* Tab Navigation */}
+      <div className="tab-navigation">
+        <div className="tab-container">
+          <button 
+            className={`tab-button ${activeTab === 'grunddaten' ? 'active' : ''}`}
+            onClick={() => setActiveTab('grunddaten')}
+          >
+            📋 Grunddaten
+          </button>
+          <button 
+            className={`tab-button ${activeTab === 'arbeitszeiten' ? 'active' : ''}`}
+            onClick={() => setActiveTab('arbeitszeiten')}
+          >
+            ⏰ Arbeitszeiten
+          </button>
+          <button 
+            className={`tab-button ${activeTab === 'materialien' ? 'active' : ''}`}
+            onClick={() => setActiveTab('materialien')}
+          >
+            🔧 Materialien
+          </button>
+          <button 
+            className={`tab-button ${activeTab === 'fotos' ? 'active' : ''}`}
+            onClick={() => setActiveTab('fotos')}
+          >
+            📸 Fotos
+          </button>
+          <button 
+            className={`tab-button ${activeTab === 'pruefbericht' ? 'active' : ''}`}
+            onClick={() => setActiveTab('pruefbericht')}
+          >
+            🔥 Prüfbericht Feuerung
+          </button>
+          <button 
+            className={`tab-button ${activeTab === 'unterschrift' ? 'active' : ''}`}
+            onClick={() => setActiveTab('unterschrift')}
+          >
+            ✍️ Unterschrift
+          </button>
+        </div>
+      </div>
+
       <div className="report-content">
         {/* Customer Information */}
         {customer && (

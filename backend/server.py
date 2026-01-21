@@ -19,6 +19,62 @@ import io
 import asyncio
 from pdf_generator import HotiEnergieTechPDFGenerator
 
+# Prüfbericht Models
+class FeuerungsanlagenDaten(BaseModel):
+    adresse_anlage: Optional[str] = ""
+    art: Optional[str] = ""
+    fabrikat_type: Optional[str] = ""
+    leistung_kw: Optional[str] = ""
+    aufstellungsort: Optional[str] = ""
+    brennstoff: Optional[str] = ""
+
+class MessgeraetDaten(BaseModel):
+    fabrikat: Optional[str] = ""
+    typenbezeichnung: Optional[str] = ""
+    kalibrierstelle: Optional[str] = ""
+    letztkalibrierung: Optional[str] = ""
+
+class AnlassUeberpruefung(BaseModel):
+    erstmalige_einfache: Optional[bool] = False
+    wiederkehrende_pruefung: Optional[bool] = False
+    maengelbehebung: Optional[bool] = False
+    ausserordentliche_pruefung: Optional[bool] = False
+
+class Messwerte(BaseModel):
+    abgastemperatur: Optional[str] = ""
+    verbrennungslufttemperatur: Optional[str] = ""
+    co2_o2_gehalt: Optional[str] = ""
+    co_gehalt: Optional[str] = ""
+    kesseltemperatur: Optional[str] = ""
+    foerderdruck: Optional[str] = ""
+    russzahl: Optional[str] = ""
+    
+    # Beurteilungswerte
+    abgasverlust_wert: Optional[str] = ""
+    abgasverlust_grenzwert: Optional[str] = ""
+    nox_gehalt_wert: Optional[str] = ""
+    nox_gehalt_grenzwert: Optional[str] = ""
+    co_gehalt_3o2_wert: Optional[str] = ""
+    co_gehalt_3o2_grenzwert: Optional[str] = ""
+
+class Maengel(BaseModel):
+    maengel_vorhanden: Optional[bool] = False
+    behebung_bis: Optional[str] = ""
+    art_maengel_bemerkung: Optional[str] = ""
+
+class PruefberichtFeuerung(BaseModel):
+    pruefnummer: Optional[str] = ""
+    pruefdatum: Optional[str] = ""
+    befund_nr: Optional[str] = ""
+    zeichen: Optional[str] = ""
+    dvr: Optional[str] = ""
+    
+    feuerungsanlage: Optional[FeuerungsanlagenDaten] = FeuerungsanlagenDaten()
+    messgeraet: Optional[MessgeraetDaten] = MessgeraetDaten()
+    anlass: Optional[AnlassUeberpruefung] = AnlassUeberpruefung()
+    messwerte: Optional[Messwerte] = Messwerte()
+    maengel: Optional[Maengel] = Maengel()
+
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 

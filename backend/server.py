@@ -407,7 +407,36 @@ async def arbeitsberichte_abrufen(
         filter_query["kunde_id"] = kunde_id
     
     berichte = await db.arbeitsberichte.find(filter_query).skip(skip).limit(limit).sort("erstellt_am", -1).to_list(limit)
-    return [Arbeitsbericht(**bericht) for bericht in berichte]
+    
+    # Clean and normalize data for Pydantic validation
+    cleaned_berichte = []
+    for bericht in berichte:
+        # Fix status field - normalize to lowercase
+        if 'status' in bericht:
+            if bericht['status'] == 'ABGESCHLOSSEN':
+                bericht['status'] = 'abgeschlossen'
+            elif bericht['status'] == 'ENTWURF':
+                bericht['status'] = 'entwurf'
+            elif bericht['status'] == 'ARCHIVIERT':
+                bericht['status'] = 'archiviert'
+        else:
+            bericht['status'] = 'abgeschlossen'  # Default value
+        
+        # Ensure arbeitszeiten has proper structure
+        if 'arbeitszeiten' not in bericht or not bericht['arbeitszeiten']:
+            bericht['arbeitszeiten'] = []
+        
+        # Ensure materialien has proper structure  
+        if 'materialien' not in bericht or not bericht['materialien']:
+            bericht['materialien'] = []
+            
+        # Convert _id to string if it exists
+        if '_id' in bericht:
+            del bericht['_id']
+            
+        cleaned_berichte.append(bericht)
+    
+    return [Arbeitsbericht(**bericht) for bericht in cleaned_berichte]
 
 @api_router.get("/arbeitsberichte/{bericht_id}", response_model=Arbeitsbericht)
 async def arbeitsbericht_abrufen(bericht_id: str, current_user: Benutzer = Depends(get_current_user)):

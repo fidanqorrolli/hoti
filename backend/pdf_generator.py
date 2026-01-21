@@ -391,6 +391,172 @@ class HotiEnergieTechPDFGenerator:
         ]))
         
         story.append(sig_table)
+        
+        # Add Prüfbericht section if available
+        if report_data.get('pruefbericht_feuerung'):
+            story.append(Spacer(1, 20))
+            self._add_pruefbericht_section(story, report_data['pruefbericht_feuerung'])
+
+    def _add_pruefbericht_section(self, story, pruefbericht):
+        """Add Prüfbericht für Feuerungsanlagen section"""
+        story.append(Paragraph("PRÜFBERICHT FÜR FEUERUNGSANLAGEN", self.styles['HotiTitle']))
+        story.append(Paragraph("Gasförmige und flüssige Brennstoffe gemäß § 23 Wiener Heizungs- und Klimaanlagengesetz, LGBl. f. Wien Nr. 14/2016", self.styles['HotiNormal']))
+        story.append(Spacer(1, 12))
+        
+        # Header data
+        header_data = [
+            [Paragraph("Prüforgan:", self.styles['HotiNormal']), Paragraph("", self.styles['HotiNormal']), Paragraph("Prüfnummer:", self.styles['HotiNormal']), Paragraph(str(pruefbericht.get('pruefnummer', '')), self.styles['HotiNormal']), Paragraph("Prüfdatum:", self.styles['HotiNormal']), Paragraph(str(pruefbericht.get('pruefdatum', '')), self.styles['HotiNormal'])],
+            [Paragraph("Befund-Nr.:", self.styles['HotiNormal']), Paragraph(str(pruefbericht.get('befund_nr', '')), self.styles['HotiNormal']), Paragraph("Zeichen:", self.styles['HotiNormal']), Paragraph(str(pruefbericht.get('zeichen', '')), self.styles['HotiNormal']), Paragraph("DVR:", self.styles['HotiNormal']), Paragraph(str(pruefbericht.get('dvr', '')), self.styles['HotiNormal'])]
+        ]
+        
+        header_table = Table(header_data, colWidths=[2.5*cm, 2.5*cm, 2.5*cm, 2.5*cm, 2.5*cm, 2.5*cm])
+        header_table.setStyle(TableStyle([
+            ('FONTSIZE', (0, 0), (-1, -1), 9),
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+            ('FONTNAME', (2, 0), (2, -1), 'Helvetica-Bold'),
+            ('FONTNAME', (4, 0), (4, -1), 'Helvetica-Bold'),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ]))
+        
+        story.append(header_table)
+        story.append(Spacer(1, 12))
+        
+        # Feuerungsanlage
+        if pruefbericht.get('feuerungsanlage'):
+            feuer = pruefbericht['feuerungsanlage']
+            story.append(Paragraph("Feuerungsanlage", self.styles['HotiSubtitle']))
+            
+            feuer_data = [
+                [Paragraph("Adresse der Anlage:", self.styles['HotiNormal']), Paragraph(str(feuer.get('adresse_anlage', '')), self.styles['HotiNormal']), Paragraph("Art:", self.styles['HotiNormal']), Paragraph(str(feuer.get('art', '')), self.styles['HotiNormal'])],
+                [Paragraph("Fabrikat/Type:", self.styles['HotiNormal']), Paragraph(str(feuer.get('fabrikat_type', '')), self.styles['HotiNormal']), Paragraph("P(NL):", self.styles['HotiNormal']), Paragraph(f"{feuer.get('leistung_kw', '')} kW", self.styles['HotiNormal'])],
+                [Paragraph("Aufstellungsort:", self.styles['HotiNormal']), Paragraph(str(feuer.get('aufstellungsort', '')), self.styles['HotiNormal']), Paragraph("Brennstoff:", self.styles['HotiNormal']), Paragraph(str(feuer.get('brennstoff', '')), self.styles['HotiNormal'])]
+            ]
+            
+            feuer_table = Table(feuer_data, colWidths=[4*cm, 5*cm, 3*cm, 6*cm])
+            feuer_table.setStyle(TableStyle([
+                ('FONTSIZE', (0, 0), (-1, -1), 9),
+                ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+                ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+                ('FONTNAME', (2, 0), (2, -1), 'Helvetica-Bold'),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ]))
+            
+            story.append(feuer_table)
+            story.append(Spacer(1, 12))
+        
+        # Messgerät
+        if pruefbericht.get('messgeraet'):
+            mess = pruefbericht['messgeraet']
+            story.append(Paragraph("Messgerät", self.styles['HotiSubtitle']))
+            
+            mess_data = [
+                [Paragraph("Fabrikat:", self.styles['HotiNormal']), Paragraph(str(mess.get('fabrikat', '')), self.styles['HotiNormal']), Paragraph("Kalibrierstelle:", self.styles['HotiNormal']), Paragraph(str(mess.get('kalibrierstelle', '')), self.styles['HotiNormal'])],
+                [Paragraph("Typenbezeichnung:", self.styles['HotiNormal']), Paragraph(str(mess.get('typenbezeichnung', '')), self.styles['HotiNormal']), Paragraph("Letztkalibrierung am:", self.styles['HotiNormal']), Paragraph(str(mess.get('letztkalibrierung', '')), self.styles['HotiNormal'])]
+            ]
+            
+            mess_table = Table(mess_data, colWidths=[4*cm, 5*cm, 4*cm, 5*cm])
+            mess_table.setStyle(TableStyle([
+                ('FONTSIZE', (0, 0), (-1, -1), 9),
+                ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+                ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+                ('FONTNAME', (2, 0), (2, -1), 'Helvetica-Bold'),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ]))
+            
+            story.append(mess_table)
+            story.append(Spacer(1, 12))
+        
+        # Anlass der Überprüfung
+        if pruefbericht.get('anlass'):
+            anlass = pruefbericht['anlass']
+            story.append(Paragraph("Anlass der Überprüfung", self.styles['HotiSubtitle']))
+            
+            checkboxes = []
+            if anlass.get('erstmalige_einfache'): checkboxes.append("☑ erstmalige einfache Überprüfung")
+            else: checkboxes.append("☐ erstmalige einfache Überprüfung")
+            
+            if anlass.get('wiederkehrende_pruefung'): checkboxes.append("☑ wiederkehrende einfache Prüfung") 
+            else: checkboxes.append("☐ wiederkehrende einfache Prüfung")
+            
+            if anlass.get('maengelbehebung'): checkboxes.append("☑ Mängelbehebung")
+            else: checkboxes.append("☐ Mängelbehebung")
+            
+            if anlass.get('ausserordentliche_pruefung'): checkboxes.append("☑ außerordentliche Prüfung")
+            else: checkboxes.append("☐ außerordentliche Prüfung")
+            
+            anlass_data = [
+                [Paragraph(checkboxes[0], self.styles['HotiNormal']), Paragraph(checkboxes[1], self.styles['HotiNormal'])],
+                [Paragraph(checkboxes[2], self.styles['HotiNormal']), Paragraph(checkboxes[3], self.styles['HotiNormal'])]
+            ]
+            
+            anlass_table = Table(anlass_data, colWidths=[9*cm, 9*cm])
+            anlass_table.setStyle(TableStyle([
+                ('FONTSIZE', (0, 0), (-1, -1), 9),
+                ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ]))
+            
+            story.append(anlass_table)
+            story.append(Spacer(1, 12))
+        
+        # Messwerte
+        if pruefbericht.get('messwerte'):
+            mess_werte = pruefbericht['messwerte']
+            story.append(Paragraph("Messwerte", self.styles['HotiSubtitle']))
+            
+            messwerte_data = [
+                [Paragraph("Messwerte", self.styles['HotiNormal']), Paragraph("", self.styles['HotiNormal']), Paragraph("Beurteilungswerte", self.styles['HotiNormal']), Paragraph("Grenzwerte", self.styles['HotiNormal'])],
+                [Paragraph("Abgastemperatur", self.styles['HotiNormal']), Paragraph(f"{mess_werte.get('abgastemperatur', '')} °C", self.styles['HotiNormal']), Paragraph("Abgasverlust", self.styles['HotiNormal']), Paragraph(f"{mess_werte.get('abgasverlust_wert', '')} %", self.styles['HotiNormal'])],
+                [Paragraph("Verbrennungslufttemperatur", self.styles['HotiNormal']), Paragraph(f"{mess_werte.get('verbrennungslufttemperatur', '')} °C", self.styles['HotiNormal']), Paragraph("NOx-Gehalt bei 3% O₂", self.styles['HotiNormal']), Paragraph(f"{mess_werte.get('nox_gehalt_wert', '')} mg/m³", self.styles['HotiNormal'])],
+                [Paragraph("CO₂-O₂-Gehalt", self.styles['HotiNormal']), Paragraph(f"{mess_werte.get('co2_o2_gehalt', '')} %", self.styles['HotiNormal']), Paragraph("CO-Gehalt bei 3% O₂", self.styles['HotiNormal']), Paragraph(f"{mess_werte.get('co_gehalt_3o2_wert', '')} mg/m³", self.styles['HotiNormal'])],
+                [Paragraph("CO-Gehalt", self.styles['HotiNormal']), Paragraph(f"{mess_werte.get('co_gehalt', '')} ppm", self.styles['HotiNormal']), Paragraph("", self.styles['HotiNormal']), Paragraph("", self.styles['HotiNormal'])],
+                [Paragraph("Kesseltemperatur", self.styles['HotiNormal']), Paragraph(f"{mess_werte.get('kesseltemperatur', '')} °C", self.styles['HotiNormal']), Paragraph("", self.styles['HotiNormal']), Paragraph("", self.styles['HotiNormal'])],
+                [Paragraph("Förderdruck Abgasanlage", self.styles['HotiNormal']), Paragraph(f"{mess_werte.get('foerderdruck', '')} Pa", self.styles['HotiNormal']), Paragraph("", self.styles['HotiNormal']), Paragraph("", self.styles['HotiNormal'])],
+                [Paragraph("Rußzahl (Mittelwert)", self.styles['HotiNormal']), Paragraph(str(mess_werte.get('russzahl', '')), self.styles['HotiNormal']), Paragraph("", self.styles['HotiNormal']), Paragraph("", self.styles['HotiNormal'])]
+            ]
+            
+            messwerte_table = Table(messwerte_data, colWidths=[4.5*cm, 4.5*cm, 4.5*cm, 4.5*cm])
+            messwerte_table.setStyle(TableStyle([
+                ('FONTSIZE', (0, 0), (-1, -1), 8),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                ('BACKGROUND', (0, 0), (-1, 0), colors.Color(0.17, 0.35, 0.63)),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ]))
+            
+            story.append(messwerte_table)
+            story.append(Spacer(1, 12))
+        
+        # Mängel
+        if pruefbericht.get('maengel'):
+            maengel = pruefbericht['maengel']
+            story.append(Paragraph("Mängel", self.styles['HotiSubtitle']))
+            
+            maengel_status = "☑ Ja" if maengel.get('maengel_vorhanden') else "☑ Nein"
+            
+            maengel_data = [
+                [Paragraph("Mängel", self.styles['HotiNormal']), Paragraph(maengel_status, self.styles['HotiNormal']), Paragraph("Behebung bis", self.styles['HotiNormal']), Paragraph(str(maengel.get('behebung_bis', '')), self.styles['HotiNormal'])],
+                [Paragraph("Art der Mängel / Bemerkung", self.styles['HotiNormal']), Paragraph(str(maengel.get('art_maengel_bemerkung', '')), self.styles['HotiNormal']), Paragraph("", self.styles['HotiNormal']), Paragraph("", self.styles['HotiNormal'])]
+            ]
+            
+            maengel_table = Table(maengel_data, colWidths=[4*cm, 4*cm, 4*cm, 6*cm])
+            maengel_table.setStyle(TableStyle([
+                ('FONTSIZE', (0, 0), (-1, -1), 9),
+                ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+                ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+                ('FONTNAME', (2, 0), (2, 0), 'Helvetica-Bold'),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                ('SPAN', (1, 1), (3, 1)),  # Span Bemerkung across columns
+            ]))
+            
+            story.append(maengel_table)
 
     def _add_footer(self, story):
         """Add footer with company information"""

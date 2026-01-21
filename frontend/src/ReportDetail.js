@@ -137,7 +137,8 @@ const ReportDetailPage = () => {
       pruefbericht_feuerung: pruefberichtData
     }));
   };
-    const file = event.target.files[0];
+
+  const handlePhotoUpload = async (event) => {
     if (!file) return;
 
     setUploadingPhoto(true);

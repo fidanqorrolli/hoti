@@ -19,6 +19,7 @@ const ReportDetailPage = () => {
   const [editing, setEditing] = useState(false);
   const [showSignature, setShowSignature] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [activeTab, setActiveTab] = useState('grunddaten');
   
   // Edit form state
   const [editData, setEditData] = useState({

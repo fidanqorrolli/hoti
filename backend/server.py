@@ -218,6 +218,8 @@ class Arbeitsbericht(BaseModel):
     techniker_name: str
     erstellt_am: datetime = Field(default_factory=datetime.utcnow)
     aktualisiert_am: datetime = Field(default_factory=datetime.utcnow)
+    # Neuer Prüfbericht für Feuerungsanlagen
+    pruefbericht_feuerung: Optional[PruefberichtFeuerung] = None
 
 class ArbeitsberichtErstellen(BaseModel):
     kunde_id: str

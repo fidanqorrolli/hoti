@@ -448,6 +448,25 @@ async def arbeitsbericht_abrufen(bericht_id: str, current_user: Benutzer = Depen
     if current_user.rolle != BenutzerRolle.ADMIN and bericht["techniker_id"] != current_user.id:
         raise HTTPException(status_code=403, detail="Nicht berechtigt")
     
+    # Clean data for Pydantic validation
+    if 'status' in bericht:
+        if bericht['status'] == 'ABGESCHLOSSEN':
+            bericht['status'] = 'abgeschlossen'
+        elif bericht['status'] == 'ENTWURF':
+            bericht['status'] = 'entwurf'  
+        elif bericht['status'] == 'ARCHIVIERT':
+            bericht['status'] = 'archiviert'
+    else:
+        bericht['status'] = 'abgeschlossen'
+    
+    # Ensure proper structure
+    if 'arbeitszeiten' not in bericht or not bericht['arbeitszeiten']:
+        bericht['arbeitszeiten'] = []
+    if 'materialien' not in bericht or not bericht['materialien']:
+        bericht['materialien'] = []
+    if '_id' in bericht:
+        del bericht['_id']
+    
     return Arbeitsbericht(**bericht)
 
 @api_router.put("/arbeitsberichte/{bericht_id}", response_model=Arbeitsbericht)

@@ -139,6 +139,7 @@ const ReportDetailPage = () => {
   };
 
   const handlePhotoUpload = async (event) => {
+    const file = event.target.files[0];
     if (!file) return;
 
     setUploadingPhoto(true);

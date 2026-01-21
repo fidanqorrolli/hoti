@@ -152,12 +152,12 @@ class Arbeitszeit(BaseModel):
     datum: str
     beginn: str
     ende: str
-    pause: str
-    arbeitszeit: str
-    wegzeit: str
-    normal: str
-    ue50: str  # Überstunden 50%
-    ue100: str  # Überstunden 100%
+    pause: Optional[int] = 0
+    arbeitszeit: Optional[str] = ""
+    wegzeit: Optional[str] = "0"
+    normal: Optional[str] = "0" 
+    ue50: Optional[str] = "0"  # Überstunden 50%
+    ue100: Optional[str] = "0"  # Überstunden 100%
 
 class Material(BaseModel):
     menge: str

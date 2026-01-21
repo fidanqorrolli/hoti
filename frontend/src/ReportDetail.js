@@ -51,7 +51,7 @@ const ReportDetailPage = () => {
     bezeichnung: ''
   });
 
-  const loadReport = async () => {
+  const loadReport = useCallback(async () => {
     try {
       const response = await axios.get(`${API}/arbeitsberichte/${id}`);
       setReport(response.data);
@@ -74,11 +74,11 @@ const ReportDetailPage = () => {
       console.error('Error loading report:', error);
     }
     setLoading(false);
-  };
+  }, [id]);
 
   useEffect(() => {
     loadReport();
-  }, [id]);
+  }, [loadReport]);
 
   const handleSave = async () => {
     try {

@@ -635,6 +635,7 @@ const ReportDetailPage = () => {
             </div>
           </div>
         )}
+      </div>
     </div>
   );
 };

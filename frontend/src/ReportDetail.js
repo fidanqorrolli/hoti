@@ -284,6 +284,358 @@ const ReportDetailPage = () => {
       </div>
 
       <div className="report-content">
+        {/* Grunddaten Tab */}
+        {activeTab === 'grunddaten' && (
+          <div className="tab-content">
+            <div className="report-section">
+              <h3>Kundeninformationen</h3>
+              <div className="customer-details">
+                <div className="detail-row">
+                  <label>Firmenname:</label>
+                  <span>{customer?.firmenname}</span>
+                </div>
+                <div className="detail-row">
+                  <label>Adresse:</label>
+                  <span>{customer?.strasse}, {customer?.plz} {customer?.ort}</span>
+                </div>
+                  <div className="detail-row">
+                    <label>Ansprechpartner:</label>
+                    <span>{customer?.ansprechpartner}</span>
+                  </div>
+                  <div className="detail-row">
+                    <label>Kontakt:</label>
+                    <span>{customer?.telefon} | {customer?.email}</span>
+                  </div>
+              </div>
+            </div>
+
+            <div className="report-section">
+              <h3>Arbeitsdetails</h3>
+              {editing ? (
+                <div className="edit-form">
+                  <div className="form-group">
+                    <label>Kommissionsnummer:</label>
+                    <input 
+                      type="text" 
+                      value={editData.komm_nr || ''} 
+                      onChange={(e) => setEditData({...editData, komm_nr: e.target.value})}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Durchgeführte Arbeiten:</label>
+                    <textarea 
+                      value={editData.durchgefuehrte_arbeiten} 
+                      onChange={(e) => setEditData({...editData, durchgefuehrte_arbeiten: e.target.value})}
+                      rows="6"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Offene Arbeiten:</label>
+                    <textarea 
+                      value={editData.offene_arbeiten || ''} 
+                      onChange={(e) => setEditData({...editData, offene_arbeiten: e.target.value})}
+                      rows="3"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Verrechnung:</label>
+                    <select 
+                      value={editData.verrechnung} 
+                      onChange={(e) => setEditData({...editData, verrechnung: e.target.value})}
+                    >
+                      <option value="Regie">Regie</option>
+                      <option value="Pauschal">Pauschal</option>
+                      <option value="Garantie">Garantie</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>
+                      <input 
+                        type="checkbox" 
+                        checked={editData.arbeit_abgeschlossen} 
+                        onChange={(e) => setEditData({...editData, arbeit_abgeschlossen: e.target.checked})}
+                      />
+                      Arbeit abgeschlossen
+                    </label>
+                  </div>
+                </div>
+              ) : (
+                <div className="work-details">
+                  <div className="detail-row">
+                    <label>Kommissionsnummer:</label>
+                    <span>{report.komm_nr || 'Nicht angegeben'}</span>
+                  </div>
+                  <div className="detail-row">
+                    <label>Durchgeführte Arbeiten:</label>
+                    <span className="work-description">{report.durchgefuehrte_arbeiten}</span>
+                  </div>
+                  <div className="detail-row">
+                    <label>Offene Arbeiten:</label>
+                    <span>{report.offene_arbeiten || 'Keine'}</span>
+                  </div>
+                  <div className="detail-row">
+                    <label>Verrechnung:</label>
+                    <span>{report.verrechnung}</span>
+                  </div>
+                  <div className="detail-row">
+                    <label>Status:</label>
+                    <span className={`status ${report.arbeit_abgeschlossen ? 'completed' : 'pending'}`}>
+                      {report.arbeit_abgeschlossen ? 'Abgeschlossen' : 'In Bearbeitung'}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Arbeitszeiten Tab */}
+        {activeTab === 'arbeitszeiten' && (
+          <div className="tab-content">
+            <div className="report-section">
+              <div className="section-header">
+                <h3>Arbeitszeiten</h3>
+                {editing && (
+                  <button onClick={addArbeitszeit} className="add-btn">
+                    <i className="fas fa-plus"></i> Zeit hinzufügen
+                  </button>
+                )}
+              </div>
+              
+              <div className="work-times-table">
+                <div className="table-header">
+                  <div>Name</div>
+                  <div>Datum</div>
+                  <div>Von</div>
+                  <div>Bis</div>
+                  <div>Pause</div>
+                  <div>Arbeitszeit</div>
+                  {editing && <div>Aktionen</div>}
+                </div>
+                {(editing ? editData.arbeitszeiten : report.arbeitszeiten)?.map((zeit, index) => (
+                  <div key={index} className="table-row">
+                    <div>{editing ? (
+                      <input 
+                        type="text" 
+                        value={zeit.name} 
+                        onChange={(e) => updateArbeitszeit(index, 'name', e.target.value)}
+                      />
+                    ) : zeit.name}</div>
+                    <div>{editing ? (
+                      <input 
+                        type="date" 
+                        value={zeit.datum} 
+                        onChange={(e) => updateArbeitszeit(index, 'datum', e.target.value)}
+                      />
+                    ) : zeit.datum}</div>
+                    <div>{editing ? (
+                      <input 
+                        type="time" 
+                        value={zeit.beginn} 
+                        onChange={(e) => updateArbeitszeit(index, 'beginn', e.target.value)}
+                      />
+                    ) : zeit.beginn}</div>
+                    <div>{editing ? (
+                      <input 
+                        type="time" 
+                        value={zeit.ende} 
+                        onChange={(e) => updateArbeitszeit(index, 'ende', e.target.value)}
+                      />
+                    ) : zeit.ende}</div>
+                    <div>{editing ? (
+                      <input 
+                        type="number" 
+                        value={zeit.pause || 0} 
+                        onChange={(e) => updateArbeitszeit(index, 'pause', parseInt(e.target.value))}
+                        min="0"
+                      />
+                    ) : (zeit.pause || 0)} Min</div>
+                    <div>{calculateWorkTime(zeit.beginn, zeit.ende, zeit.pause || 0)}</div>
+                    {editing && (
+                      <div>
+                        <button onClick={() => removeArbeitszeit(index)} className="delete-btn">
+                          <i className="fas fa-trash"></i>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Materialien Tab */}
+        {activeTab === 'materialien' && (
+          <div className="tab-content">
+            <div className="report-section">
+              <div className="section-header">
+                <h3>Materialien</h3>
+                {editing && (
+                  <button onClick={addMaterial} className="add-btn">
+                    <i className="fas fa-plus"></i> Material hinzufügen
+                  </button>
+                )}
+              </div>
+              
+              <div className="materials-table">
+                <div className="table-header">
+                  <div>Menge</div>
+                  <div>Einheit</div>
+                  <div>Bezeichnung</div>
+                  {editing && <div>Aktionen</div>}
+                </div>
+                {(editing ? editData.materialien : report.materialien)?.map((material, index) => (
+                  <div key={index} className="table-row">
+                    <div>{editing ? (
+                      <input 
+                        type="number" 
+                        value={material.menge} 
+                        onChange={(e) => updateMaterial(index, 'menge', parseFloat(e.target.value))}
+                        step="0.1"
+                        min="0"
+                      />
+                    ) : material.menge}</div>
+                    <div>{editing ? (
+                      <select 
+                        value={material.einheit} 
+                        onChange={(e) => updateMaterial(index, 'einheit', e.target.value)}
+                      >
+                        <option value="Stk">Stk</option>
+                        <option value="m">m</option>
+                        <option value="m²">m²</option>
+                        <option value="m³">m³</option>
+                        <option value="kg">kg</option>
+                        <option value="l">l</option>
+                        <option value="Std">Std</option>
+                      </select>
+                    ) : material.einheit}</div>
+                    <div>{editing ? (
+                      <input 
+                        type="text" 
+                        value={material.bezeichnung} 
+                        onChange={(e) => updateMaterial(index, 'bezeichnung', e.target.value)}
+                      />
+                    ) : material.bezeichnung}</div>
+                    {editing && (
+                      <div>
+                        <button onClick={() => removeMaterial(index)} className="delete-btn">
+                          <i className="fas fa-trash"></i>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Fotos Tab */}
+        {activeTab === 'fotos' && (
+          <div className="tab-content">
+            <div className="report-section">
+              <div className="section-header">
+                <h3>Fotos</h3>
+                <div className="photo-upload">
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handlePhotoUpload}
+                    disabled={uploadingPhoto}
+                    id="photo-upload"
+                    style={{display: 'none'}}
+                  />
+                  <label htmlFor="photo-upload" className="upload-btn">
+                    <i className="fas fa-camera"></i>
+                    {uploadingPhoto ? 'Wird hochgeladen...' : 'Foto hinzufügen'}
+                  </label>
+                </div>
+              </div>
+              
+              <div className="photos-grid">
+                {report.fotos?.map((foto, index) => (
+                  <div key={index} className="photo-item">
+                    <img 
+                      src={`data:image/jpeg;base64,${foto.data}`} 
+                      alt={foto.beschreibung}
+                      onClick={() => {/* Foto vergrößern */}}
+                    />
+                    <div className="photo-caption">{foto.beschreibung}</div>
+                  </div>
+                ))}
+                {report.fotos?.length === 0 && (
+                  <div className="no-photos">
+                    <i className="fas fa-camera"></i>
+                    <p>Noch keine Fotos hinzugefügt</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Prüfbericht Tab */}
+        {activeTab === 'pruefbericht' && (
+          <div className="tab-content">
+            <PruefberichtFeuerung
+              pruefbericht={report.pruefbericht_feuerung}
+              onUpdate={handlePruefberichtUpdate}
+            />
+          </div>
+        )}
+
+        {/* Unterschrift Tab */}
+        {activeTab === 'unterschrift' && (
+          <div className="tab-content">
+            <div className="report-section">
+              <h3>Unterschrift</h3>
+              
+              {report.unterschrift_kunde ? (
+                <div className="signature-display">
+                  <h4>Kundenunterschrift:</h4>
+                  <img 
+                    src={report.unterschrift_kunde} 
+                    alt="Unterschrift" 
+                    className="signature-image"
+                  />
+                  <button onClick={() => setShowSignature(true)} className="edit-signature-btn">
+                    Unterschrift ändern
+                  </button>
+                </div>
+              ) : (
+                <div className="no-signature">
+                  <p>Keine Unterschrift vorhanden</p>
+                  <button onClick={() => setShowSignature(true)} className="add-signature-btn">
+                    Unterschrift hinzufügen
+                  </button>
+                </div>
+              )}
+
+              {showSignature && (
+                <div className="signature-modal">
+                  <div className="signature-content">
+                    <h4>Unterschrift erfassen</h4>
+                    <SignatureCanvas 
+                      ref={signaturePadRef}
+                      canvasProps={{
+                        width: 400,
+                        height: 200,
+                        className: 'signature-canvas'
+                      }}
+                    />
+                    <div className="signature-actions">
+                      <button onClick={clearSignature} className="clear-btn">Löschen</button>
+                      <button onClick={handleSignatureSave} className="save-btn">Speichern</button>
+                      <button onClick={() => setShowSignature(false)} className="cancel-btn">Abbrechen</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
         {/* Customer Information */}
         {customer && (
           <div className="report-section">

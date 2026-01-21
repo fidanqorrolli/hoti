@@ -131,7 +131,12 @@ const ReportDetailPage = () => {
     setEditData({ ...editData, materialien: updatedMaterials });
   };
 
-  const handlePhotoUpload = async (event) => {
+  const handlePruefberichtUpdate = (pruefberichtData) => {
+    setReport(prev => ({
+      ...prev,
+      pruefbericht_feuerung: pruefberichtData
+    }));
+  };
     const file = event.target.files[0];
     if (!file) return;
 

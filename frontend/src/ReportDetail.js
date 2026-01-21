@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import SignatureCanvas from 'react-signature-canvas';
 import { PDFExportButton } from './PDFExport';
+import PruefberichtFeuerung from './PruefberichtFeuerung';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;

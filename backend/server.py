@@ -160,7 +160,7 @@ class Arbeitszeit(BaseModel):
     ue100: Optional[str] = "0"  # Überstunden 100%
 
 class Material(BaseModel):
-    menge: str
+    menge: Union[str, int, float]
     einheit: str
     bezeichnung: str
 

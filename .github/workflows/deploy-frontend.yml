@@ -7,18 +7,21 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./frontend # I thotë GitHub-it të punojë brenda folderit frontend
+        working-directory: ./frontend
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
       - run: npm install
-      - run: npm run build
+      # CI=false lejon ndërtimin edhe nëse ka paralajmërime (warnings)
+      - run: CI=false npm run build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./frontend/build # React (pa Vite) zakonisht e krijon rezultatin te folderi 'build'
+          # Skedari package.json tregon se React nxjerr rezultatin te folderi 'build'
+          path: ./frontend/build
+
   deploy:
     needs: build
     permissions:

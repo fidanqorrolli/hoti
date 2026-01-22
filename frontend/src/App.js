@@ -6,7 +6,8 @@ import CalendarView from './CalendarView';
 import SettingsPage from './SettingsPage';
 import './App.css';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+// Ndryshimi: Shtojmë një vlerë rezervë nëse mungon variabla e mjedisit
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'https://hoti-backend.onrender.com';
 const API = `${BACKEND_URL}/api`;
 
 // Auth Context
@@ -761,7 +762,8 @@ const NewReportPage = () => {
 const App = () => {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      {/* Ndryshimi kryesor: Shtojmë basename="/hoti" */}
+      <BrowserRouter basename="/hoti">
         <div className="App">
           <Routes>
             <Route path="/login" element={<LoginPage />} />

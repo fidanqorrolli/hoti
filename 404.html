@@ -1,1 +1,211 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#2c5aa0" />
+    <meta name="description" content="HotiEnergieTec Mobile Arbeitsberichts-App für Techniker" />
+    
+    <!-- PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="HotiEnergieTec">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="HotiEnergieTec">
+    
+    <!-- Icons -->
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/icon-192.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="https://www.hotienergietec.at/images/Logo_229125.webp" type="image/x-icon">
+    
+    <title>HotiEnergieTec - Arbeitsberichte</title>
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="https://www.hotienergietec.at/images/Logo_229125.webp" as="image">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    
+    <!-- Install prompt styling -->
+    <style>
+      .install-prompt {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        right: 20px;
+        background: #2c5aa0;
+        color: white;
+        padding: 15px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        z-index: 9999;
+        display: none;
+        align-items: center;
+        gap: 15px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      }
+      
+      .install-prompt-icon {
+        font-size: 24px;
+        flex-shrink: 0;
+      }
+      
+      .install-prompt-text {
+        flex: 1;
+      }
+      
+      .install-prompt-text h4 {
+        margin: 0 0 5px 0;
+        font-size: 16px;
+        font-weight: 600;
+      }
+      
+      .install-prompt-text p {
+        margin: 0;
+        font-size: 14px;
+        opacity: 0.9;
+      }
+      
+      .install-prompt-actions {
+        display: flex;
+        gap: 10px;
+      }
+      
+      .install-btn, .install-close {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      
+      .install-btn {
+        background: white;
+        color: #2c5aa0;
+      }
+      
+      .install-close {
+        background: transparent;
+        color: white;
+        border: 1px solid rgba(255,255,255,0.3);
+      }
+      
+      .install-btn:hover, .install-close:hover {
+        transform: translateY(-1px);
+      }
+    </style>
+  </head>
+  <body>
+    <noscript>Sie müssen JavaScript aktivieren, um diese App zu verwenden.</noscript>
+    <div id="root"></div>
+    
+    <!-- Install Prompt -->
+    <div id="install-prompt" class="install-prompt">
+      <div class="install-prompt-icon">📱</div>
+      <div class="install-prompt-text">
+        <h4>App installieren</h4>
+        <p>Installieren Sie HotiEnergieTech als App auf Ihrem Gerät</p>
+      </div>
+      <div class="install-prompt-actions">
+        <button id="install-btn" class="install-btn">Installieren</button>
+        <button id="install-close" class="install-close">Später</button>
+      </div>
+    </div>
 
+    <script>
+      // Register Service Worker
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+              console.log('SW registered: ', registration);
+            })
+            .catch((registrationError) => {
+              console.log('SW registration failed: ', registrationError);
+            });
+        });
+      }
+
+      // PWA Install Prompt
+      let deferredPrompt;
+      const installPrompt = document.getElementById('install-prompt');
+      const installBtn = document.getElementById('install-btn');
+      const installClose = document.getElementById('install-close');
+
+      window.addEventListener('beforeinstallprompt', (e) => {
+        console.log('PWA: beforeinstallprompt fired');
+        e.preventDefault();
+        deferredPrompt = e;
+        
+        // Show install prompt after 3 seconds
+        setTimeout(() => {
+          installPrompt.style.display = 'flex';
+        }, 3000);
+      });
+
+      installBtn.addEventListener('click', async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          console.log(`PWA: User response to the install prompt: ${outcome}`);
+          deferredPrompt = null;
+        }
+        installPrompt.style.display = 'none';
+      });
+
+      installClose.addEventListener('click', () => {
+        installPrompt.style.display = 'none';
+        // Don't show again for 24 hours
+        localStorage.setItem('install-prompt-dismissed', Date.now());
+      });
+
+      // Check if user already dismissed
+      const dismissed = localStorage.getItem('install-prompt-dismissed');
+      if (dismissed && Date.now() - parseInt(dismissed) < 24 * 60 * 60 * 1000) {
+        // Still within 24 hours, don't show
+      } else {
+        localStorage.removeItem('install-prompt-dismissed');
+      }
+
+      // Handle app installation
+      window.addEventListener('appinstalled', (evt) => {
+        console.log('PWA: App was installed');
+        installPrompt.style.display = 'none';
+      });
+
+      // Add to homescreen detection for iOS
+      function isIOS() {
+        return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      }
+
+      function isInStandaloneMode() {
+        return ('standalone' in window.navigator) && (window.navigator.standalone);
+      }
+
+      if (isIOS() && !isInStandaloneMode()) {
+        // Show iOS install instructions
+        setTimeout(() => {
+          if (!localStorage.getItem('ios-install-dismissed')) {
+            const iosPrompt = document.createElement('div');
+            iosPrompt.className = 'install-prompt';
+            iosPrompt.style.display = 'flex';
+            iosPrompt.innerHTML = `
+              <div class="install-prompt-icon">🍎</div>
+              <div class="install-prompt-text">
+                <h4>Zum Homescreen hinzufügen</h4>
+                <p>Tippen Sie auf <strong>Teilen</strong> und dann auf <strong>Zum Home-Bildschirm</strong></p>
+              </div>
+              <div class="install-prompt-actions">
+                <button onclick="this.parentElement.parentElement.style.display='none'; localStorage.setItem('ios-install-dismissed', 'true');" class="install-close">OK</button>
+              </div>
+            `;
+            document.body.appendChild(iosPrompt);
+          }
+        }, 5000);
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PDF Export Test</title>
+</head>
+<body>
+    <h1>PDF Export Test</h1>
+    <button id="downloadPdf">Download Test PDF</button>
+    <div id="status"></div>
+
+    <script>
+        async function testPdfDownload() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = 'Starting download...';
+            
+            try {
+                // First login
+                const loginResponse = await fetch('/api/auth/anmelden', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        benutzername: 'admin',
+                        passwort: 'admin123'
+                    })
+                });
+                
+                if (!loginResponse.ok) {
+                    throw new Error('Login failed');
+                }
+                
+                const loginData = await loginResponse.json();
+                statusDiv.innerHTML += '<br>✅ Login successful';
+                
+                // Download PDF
+                const pdfResponse = await fetch('/api/arbeitsberichte/4c1229e2-ff87-4c62-9bfd-38f36c0b7df3/pdf', {
+                    headers: {
+                        'Authorization': `Bearer ${loginData.access_token}`,
+                        'Accept': 'application/pdf'
+                    }
+                });
+                
+                if (!pdfResponse.ok) {
+                    throw new Error(`PDF download failed: ${pdfResponse.status}`);
+                }
+                
+                statusDiv.innerHTML += '<br>✅ PDF response received';
+                statusDiv.innerHTML += `<br>Content-Type: ${pdfResponse.headers.get('content-type')}`;
+                statusDiv.innerHTML += `<br>Size: ${pdfResponse.headers.get('content-length')} bytes`;
+                
+                // Get blob and create download
+                const blob = await pdfResponse.blob();
+                const url = window.URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'test-report.pdf';
+                a.style.display = 'none';
+                
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                
+                window.URL.revokeObjectURL(url);
+                
+                statusDiv.innerHTML += '<br>✅ PDF download completed';
+                
+            } catch (error) {
+                statusDiv.innerHTML += `<br>❌ Error: ${error.message}`;
+                console.error('PDF download error:', error);
+            }
+        }
+        
+        document.getElementById('downloadPdf').addEventListener('click', testPdfDownload);
+    </script>
+</body>
+</html>

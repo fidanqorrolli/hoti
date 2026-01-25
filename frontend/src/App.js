@@ -40,11 +40,13 @@ const AuthProvider = ({ children }) => {
 
   const login = async (benutzername, passwort) => {
   try {
-    // Këtu bëjmë përkthimin për serverin:
+    // KËTU ËSHTË NDRYSHIMI I RENDESISHEM:
     const response = await axios.post(`${API}/auth/anmelden`, {
-      username: benutzername,  // Dërgojmë 'username', fusim vlerën e 'benutzername'
-      password: passwort       // Dërgojmë 'password', fusim vlerën e 'passwort'
+      benutzername: benutzername,  // <--- Duhet 'benutzername' (si në Python)
+      passwort: passwort           // <--- Duhet 'passwort' (si në Python)
     });
+    
+    // ... pjesa tjetër e kodit
       
       const { access_token, benutzer } = response.data;
       localStorage.setItem('token', access_token);

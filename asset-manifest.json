@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/hoti/static/css/main.a95b15fe.css",
+    "main.js": "/hoti/static/js/main.fbd1e578.js",
+    "index.html": "/hoti/index.html",
+    "main.a95b15fe.css.map": "/hoti/static/css/main.a95b15fe.css.map",
+    "main.fbd1e578.js.map": "/hoti/static/js/main.fbd1e578.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.a95b15fe.css",
+    "static/js/main.fbd1e578.js"
+  ]
+}

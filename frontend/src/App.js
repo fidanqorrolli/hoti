@@ -111,7 +111,7 @@ const Header = () => {
             alt="HotiEnergieTec" 
             className="logo"
           />
-          <h1>Arbeitsberichte</h1>
+          <h1>Arbeitsberichte V2</h1>
         </div>
         <div className="header-right">
           <Link to="/einstellungen" className="settings-link">

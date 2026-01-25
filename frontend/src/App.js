@@ -866,6 +866,7 @@ const NewReportPage = () => {
         <div className="form-actions">
           <button 
             type="button" 
+<<<<<<< HEAD
             onClick={() => navigate('/berichte')} 
             className="btn btn-secondary"
           >
@@ -919,3 +920,6 @@ const App = () => {
 };
 
 export default App;
+=======
+            onClick
+>>>>>>> 9b77f083fd0f0d862249f13e01c4bdf695e1c243

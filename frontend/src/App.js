@@ -6,8 +6,6 @@ import CalendarView from './CalendarView';
 import SettingsPage from './SettingsPage';
 import './App.css';
 
-// Ndryshimi: Shtojmë një vlerë rezervë nëse mungon variabla e mjedisit
-// Kjo është mënyra e sigurt:
 const API = 'https://hoti-backend.onrender.com/api';
 
 // Auth Context
@@ -39,14 +37,11 @@ const AuthProvider = ({ children }) => {
   };
 
   const login = async (benutzername, passwort) => {
-  try {
-    // KËTU ËSHTË NDRYSHIMI I RENDESISHEM:
-    const response = await axios.post(`${API}/auth/anmelden`, {
-      benutzername: benutzername,  // <--- Duhet 'benutzername' (si në Python)
-      passwort: passwort           // <--- Duhet 'passwort' (si në Python)
-    });
-    
-    // ... pjesa tjetër e kodit
+    try {
+      const response = await axios.post(`${API}/auth/anmelden`, {
+        benutzername: benutzername,
+        passwort: passwort
+      });
       
       const { access_token, benutzer } = response.data;
       localStorage.setItem('token', access_token);
@@ -240,6 +235,7 @@ const DashboardPage = () => {
   const [stats, setStats] = useState({});
   const [recentReports, setRecentReports] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     loadDashboardData();
@@ -254,8 +250,15 @@ const DashboardPage = () => {
       
       setStats(statsResponse.data);
       setRecentReports(reportsResponse.data);
+      setError('');
     } catch (error) {
       console.error('Error loading dashboard:', error);
+      const errorMsg = error.response?.status === 401 
+        ? 'Sitzung abgelaufen. Bitte melden Sie sich erneut an.'
+        : error.response?.status === 500
+        ? 'Serverfehler. Bitte versuchen Sie es später erneut.'
+        : 'Fehler beim Laden der Dashboard-Daten.';
+      setError(errorMsg);
     }
     setLoading(false);
   };
@@ -264,6 +267,18 @@ const DashboardPage = () => {
     return (
       <div className="loading-screen">
         <div className="loading-spinner"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="error-container">
+        <i className="fas fa-exclamation-triangle"></i>
+        <p>{error}</p>
+        <button onClick={loadDashboardData} className="btn btn-primary">
+          Erneut versuchen
+        </button>
       </div>
     );
   }
@@ -335,7 +350,7 @@ const DashboardPage = () => {
                 </div>
                 <div className="report-content">
                   <h4>{report.kunde_firmenname}</h4>
-                  <p>{report.durchgefuehrte_arbeiten.substring(0, 100)}...</p>
+                  <p>{(report.durchgefuehrte_arbeiten || 'Keine Beschreibung').substring(0, 100)}...</p>
                   <div className="report-meta">
                     <span>{new Date(report.erstellt_am).toLocaleDateString('de-DE')}</span>
                     <span>{report.techniker_name}</span>
@@ -350,17 +365,20 @@ const DashboardPage = () => {
   );
 };
 
-// Reports List Page
+// Reports List Page - IMPROVED WITH SAFETY CHECKS
 const ReportsPage = () => {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('alle');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     loadReports();
   }, [filter]);
 
   const loadReports = async () => {
+    setLoading(true);
+    setError('');
     try {
       let url = `${API}/arbeitsberichte`;
       if (filter !== 'alle') {
@@ -371,6 +389,12 @@ const ReportsPage = () => {
       setReports(response.data);
     } catch (error) {
       console.error('Error loading reports:', error);
+      const errorMsg = error.response?.status === 401 
+        ? 'Sitzung abgelaufen. Bitte melden Sie sich erneut an.'
+        : error.response?.status === 500
+        ? 'Serverfehler. Bitte versuchen Sie es später erneut.'
+        : 'Fehler beim Laden der Berichte.';
+      setError(errorMsg);
     }
     setLoading(false);
   };
@@ -391,6 +415,15 @@ const ReportsPage = () => {
           <i className="fas fa-plus"></i> Neuer Bericht
         </Link>
       </div>
+
+      {error && (
+        <div className="error-message" style={{marginBottom: '1rem', padding: '1rem', background: '#fee', borderRadius: '8px', color: '#c33'}}>
+          <i className="fas fa-exclamation-circle"></i> {error}
+          <button onClick={loadReports} style={{marginLeft: '1rem'}} className="btn btn-secondary">
+            Erneut laden
+          </button>
+        </div>
+      )}
 
       <div className="filter-tabs">
         <button
@@ -423,25 +456,37 @@ const ReportsPage = () => {
         </div>
       ) : (
         <div className="reports-list">
-          {reports.map(report => (
-            <Link key={report.id} to={`/berichte/${report.id}`} className="report-card">
-              <div className="report-header">
-                <span className="report-number">{report.nummer}</span>
-                <span className={`status-badge ${report.status}`}>
-                  {report.status === 'entwurf' ? 'Entwurf' : 
-                   report.status === 'abgeschlossen' ? 'Abgeschlossen' : 'Archiviert'}
-                </span>
-              </div>
-              <div className="report-content">
-                <h4>{report.kunde_firmenname}</h4>
-                <p>{report.durchgefuehrte_arbeiten.substring(0, 150)}...</p>
-                <div className="report-meta">
-                  <span><i className="fas fa-calendar"></i> {new Date(report.erstellt_am).toLocaleDateString('de-DE')}</span>
-                  <span><i className="fas fa-user"></i> {report.techniker_name}</span>
+          {reports.map(report => {
+            // SAFETY CHECK: Handle empty or null durchgefuehrte_arbeiten
+            const workText = report.durchgefuehrte_arbeiten || 'Keine Beschreibung verfügbar';
+            const previewText = workText.length > 150 ? workText.substring(0, 150) + '...' : workText;
+            
+            return (
+              <Link key={report.id} to={`/berichte/${report.id}`} className="report-card">
+                <div className="report-header">
+                  <span className="report-number">{report.nummer || 'N/A'}</span>
+                  <span className={`status-badge ${report.status}`}>
+                    {report.status === 'entwurf' ? 'Entwurf' : 
+                     report.status === 'abgeschlossen' ? 'Abgeschlossen' : 'Archiviert'}
+                  </span>
                 </div>
-              </div>
-            </Link>
-          ))}
+                <div className="report-content">
+                  <h4>{report.kunde_firmenname || 'Unbekannter Kunde'}</h4>
+                  <p>{previewText}</p>
+                  <div className="report-meta">
+                    <span>
+                      <i className="fas fa-calendar"></i> 
+                      {report.erstellt_am ? new Date(report.erstellt_am).toLocaleDateString('de-DE') : 'N/A'}
+                    </span>
+                    <span>
+                      <i className="fas fa-user"></i> 
+                      {report.techniker_name || 'Unbekannt'}
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>
@@ -453,6 +498,7 @@ const CustomersPage = () => {
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [error, setError] = useState('');
   const [newCustomer, setNewCustomer] = useState({
     firmenname: '',
     strasse: '',
@@ -471,14 +517,22 @@ const CustomersPage = () => {
     try {
       const response = await axios.get(`${API}/kunden`);
       setCustomers(response.data);
+      setError('');
     } catch (error) {
       console.error('Error loading customers:', error);
+      const errorMsg = error.response?.status === 401 
+        ? 'Sitzung abgelaufen. Bitte melden Sie sich erneut an.'
+        : error.response?.status === 500
+        ? 'Serverfehler. Bitte versuchen Sie es später erneut.'
+        : 'Fehler beim Laden der Kunden.';
+      setError(errorMsg);
     }
     setLoading(false);
   };
 
   const handleAddCustomer = async (e) => {
     e.preventDefault();
+    setError('');
     try {
       await axios.post(`${API}/kunden`, newCustomer);
       setShowAddForm(false);
@@ -494,6 +548,8 @@ const CustomersPage = () => {
       loadCustomers();
     } catch (error) {
       console.error('Error adding customer:', error);
+      const errorMsg = error.response?.data?.detail || 'Fehler beim Hinzufügen des Kunden.';
+      setError(errorMsg);
     }
   };
 
@@ -516,6 +572,12 @@ const CustomersPage = () => {
           <i className="fas fa-plus"></i> Neuer Kunde
         </button>
       </div>
+
+      {error && (
+        <div className="error-message" style={{marginBottom: '1rem', padding: '1rem', background: '#fee', borderRadius: '8px', color: '#c33'}}>
+          <i className="fas fa-exclamation-circle"></i> {error}
+        </div>
+      )}
 
       {showAddForm && (
         <div className="add-customer-form">
@@ -646,13 +708,15 @@ const CustomersPage = () => {
   );
 };
 
-// New Report Page (Basic version for now)
+// New Report Page - IMPROVED WITH NO-CUSTOMER CHECK
 const NewReportPage = () => {
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCustomer, setSelectedCustomer] = useState('');
   const [workDescription, setWorkDescription] = useState('');
   const [kommNr, setKommNr] = useState('');
+  const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -663,8 +727,15 @@ const NewReportPage = () => {
     try {
       const response = await axios.get(`${API}/kunden`);
       setCustomers(response.data);
+      setError('');
     } catch (error) {
       console.error('Error loading customers:', error);
+      const errorMsg = error.response?.status === 401 
+        ? 'Sitzung abgelaufen. Bitte melden Sie sich erneut an.'
+        : error.response?.status === 500
+        ? 'Serverfehler. Bitte versuchen Sie es später erneut.'
+        : 'Fehler beim Laden der Kunden.';
+      setError(errorMsg);
     }
     setLoading(false);
   };
@@ -672,8 +743,12 @@ const NewReportPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!selectedCustomer || !workDescription) {
+      setError('Bitte füllen Sie alle Pflichtfelder aus.');
       return;
     }
+
+    setSubmitting(true);
+    setError('');
 
     try {
       const response = await axios.post(`${API}/arbeitsberichte`, {
@@ -690,7 +765,14 @@ const NewReportPage = () => {
       navigate(`/berichte/${response.data.id}`);
     } catch (error) {
       console.error('Error creating report:', error);
+      const errorMsg = error.response?.status === 401 
+        ? 'Sitzung abgelaufen. Bitte melden Sie sich erneut an.'
+        : error.response?.status === 500
+        ? 'Serverfehler. Bitte versuchen Sie es später erneut.'
+        : error.response?.data?.detail || 'Fehler beim Erstellen des Berichts.';
+      setError(errorMsg);
     }
+    setSubmitting(false);
   };
 
   if (loading) {
@@ -701,11 +783,44 @@ const NewReportPage = () => {
     );
   }
 
+  // CHECK: If no customers exist, show special message
+  if (customers.length === 0) {
+    return (
+      <div className="new-report-page">
+        <div className="page-header">
+          <h1>Neuer Arbeitsbericht</h1>
+        </div>
+        
+        <div className="empty-state">
+          <i className="fas fa-users" style={{fontSize: '4rem', color: '#ff6b6b', marginBottom: '1rem'}}></i>
+          <h3>Keine Kunden vorhanden</h3>
+          <p>Sie müssen zuerst einen Kunden anlegen, bevor Sie einen Arbeitsbericht erstellen können.</p>
+          <Link to="/kunden" className="btn btn-primary" style={{marginTop: '1rem'}}>
+            <i className="fas fa-plus"></i> Kunde anlegen
+          </Link>
+          <button 
+            onClick={() => navigate('/berichte')} 
+            className="btn btn-secondary"
+            style={{marginTop: '0.5rem'}}
+          >
+            Zurück zu Berichten
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="new-report-page">
       <div className="page-header">
         <h1>Neuer Arbeitsbericht</h1>
       </div>
+
+      {error && (
+        <div className="error-message" style={{marginBottom: '1rem', padding: '1rem', background: '#fee', borderRadius: '8px', color: '#c33'}}>
+          <i className="fas fa-exclamation-circle"></i> {error}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="report-form">
         <div className="form-group">
@@ -749,55 +864,6 @@ const NewReportPage = () => {
         </div>
 
         <div className="form-actions">
-          <button type="button" onClick={() => navigate('/berichte')} className="btn btn-secondary">
-            Abbrechen
-          </button>
-          <button type="submit" className="btn btn-primary">
-            Bericht erstellen
-          </button>
-        </div>
-      </form>
-    </div>
-  );
-};
-
-// Main App Component
-const App = () => {
-  return (
-    <AuthProvider>
-      {/* Ndryshimi kryesor: Shtojmë basename="/hoti" */}
-      <BrowserRouter basename="/hoti">
-        <div className="App">
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route
-              path="/*"
-              element={
-                <ProtectedRoute>
-                  <div className="app-layout">
-                    <Header />
-                    <main className="main-content">
-                      <Routes>
-                        <Route path="/" element={<Navigate to="/dashboard" />} />
-                        <Route path="/dashboard" element={<DashboardPage />} />
-                        <Route path="/berichte" element={<ReportsPage />} />
-                        <Route path="/berichte/:id" element={<ReportDetailPage />} />
-                        <Route path="/kalender" element={<CalendarView />} />
-                        <Route path="/kunden" element={<CustomersPage />} />
-                        <Route path="/neuer-bericht" element={<NewReportPage />} />
-                        <Route path="/einstellungen" element={<SettingsPage />} />
-                      </Routes>
-                    </main>
-                    <Navigation />
-                  </div>
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-        </div>
-      </BrowserRouter>
-    </AuthProvider>
-  );
-};
-
-export default App;
+          <button 
+            type="button" 
+            onClick

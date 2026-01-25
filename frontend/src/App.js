@@ -39,11 +39,12 @@ const AuthProvider = ({ children }) => {
   };
 
   const login = async (benutzername, passwort) => {
-    try {
-      const response = await axios.post(`${API}/auth/anmelden`, {
-        benutzername,
-        passwort
-      });
+  try {
+    // Këtu bëjmë përkthimin për serverin:
+    const response = await axios.post(`${API}/auth/anmelden`, {
+      username: benutzername,  // Dërgojmë 'username', fusim vlerën e 'benutzername'
+      password: passwort       // Dërgojmë 'password', fusim vlerën e 'passwort'
+    });
       
       const { access_token, benutzer } = response.data;
       localStorage.setItem('token', access_token);

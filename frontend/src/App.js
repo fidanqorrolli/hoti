@@ -111,7 +111,7 @@ const Header = () => {
             alt="HotiEnergieTec" 
             className="logo"
           />
-          <h1>Arbeitsberichte</h1>
+          <h1>Arbeitsberichte V2</h1>
         </div>
         <div className="header-right">
           <Link to="/einstellungen" className="settings-link">
@@ -866,4 +866,56 @@ const NewReportPage = () => {
         <div className="form-actions">
           <button 
             type="button" 
-            onClick
+            onClick={() => navigate('/berichte')} 
+            className="btn btn-secondary"
+          >
+            Abbrechen
+          </button>
+          <button type="submit" className="btn btn-primary" disabled={submitting}>
+            {submitting ? 'Wird erstellt...' : 'Bericht erstellen'}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+// Main App Component
+const App = () => {
+  return (
+    <AuthProvider>
+      <BrowserRouter basename="/hoti">
+        <div className="App">
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route
+              path="/*"
+              element={
+                <ProtectedRoute>
+                  <div className="app-layout">
+                    <Header />
+                    <main className="main-content">
+                      <Routes>
+                        <Route path="/" element={<Navigate to="/dashboard" />} />
+                        <Route path="/dashboard" element={<DashboardPage />} />
+                        <Route path="/berichte" element={<ReportsPage />} />
+                        <Route path="/berichte/:id" element={<ReportDetailPage />} />
+                        <Route path="/kalender" element={<CalendarView />} />
+                        <Route path="/kunden" element={<CustomersPage />} />
+                        <Route path="/neuer-bericht" element={<NewReportPage />} />
+                        <Route path="/einstellungen" element={<SettingsPage />} />
+                      </Routes>
+                    </main>
+                    <Navigation />
+                  </div>
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </div>
+      </BrowserRouter>
+    </AuthProvider>
+  );
+};
+
+export default App;

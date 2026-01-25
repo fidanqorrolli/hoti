@@ -7,8 +7,8 @@ import SettingsPage from './SettingsPage';
 import './App.css';
 
 // Ndryshimi: Shtojmë një vlerë rezervë nëse mungon variabla e mjedisit
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'https://hoti-backend.onrender.com';
-const API = `${BACKEND_URL}/api`;
+// Kjo është mënyra e sigurt:
+const API = 'https://hoti-backend.onrender.com/api';
 
 // Auth Context
 const AuthContext = React.createContext();
